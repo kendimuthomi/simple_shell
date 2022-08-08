@@ -155,7 +155,7 @@ int _myhelp(info_t *);
 int _myhistory(info_t *);
 int _myalias(info_t *);
 /* getline.c module */
-ssize_t get_input(info_t *);
+ssize_t _get_input(info_t *);
 int _getline(info_t *, char **, size_t *);
 void sigintHandler(int);
 /* info.c module */
