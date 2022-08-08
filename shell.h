@@ -109,10 +109,10 @@ char *find_path(info_t *, char *, char *);
 /* loophsh.c */
 int loophsh(char **);
 /* err_string_functions.c */
-void _eputs(char *);
-int _eputchar(char);
-int _putfd(char c, int fd);
-int _putsfd(char *str, int fd);
+void _eputs_(char *);
+int _eputchar_(char);
+int _putfd_(char c, int fd);
+int _putsfd_(char *str, int fd);
 /* string_functions.c */
 int _strlen(char *);
 int _strcmp(char *, char *);
