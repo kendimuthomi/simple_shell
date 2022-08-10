@@ -1,63 +1,61 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-#include <string.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/types.h>
-#include <dirent.h>
 #include <sys/stat.h>
-#include <stdarg.h>
-#include <signal.h>
-#define PROMPT "hsh $ "
+#include <time.h>
+#include <stdbool.h>
 
-
-/**
- * struct builtin_d - Defines the builtins functions.
- * @built: The name of the build in command.
- * @f: A pointer to the right builtin function.
- */
-typedef struct builtin_d
-{
-	char *built;
-	void (*f)(char *);
-} builtin_t;
-
+/* environment variables */
 extern char **environ;
+extern __sighandler_t signal(int __sig, __sighandler_t __handler);
 
-char **token_interface(char *, const char *, int);
-int count_token(char *, const char *);
-char **tokenize(int, char *, const char *);
-void create_child(char **, char *, int, char **);
-void parse_line(char *, size_t, int, char **);
-char *path_finder(char *);
-int str_len(char *);
-int find_path(char *);
-char **tokenize_path(int, char *);
-char *search_directories(char **, char *);
-char *build_path(char *, char *);
-void double_free(char **);
-void single_free(int, ...);
+/* handle built ins */
+int checker(char **cmd, char *buf);
+void prompt_user(void);
+void handle_signal(int m);
+char **tokenizer(char *line);
+char *test_path(char **path, char *command);
+char *append_path(char *path, char *command);
+int handle_builtin(char **command, char *line);
+void exit_cmd(char **command, char *line);
 
-/*Builtin functions*/
-int built_in(char **, char *);
-void (*check_built_ins(char *))(char *);
-void exit_b(char *);
-void env_b(char *);
-void cd_b(char *);
+void print_env(void);
 
-/*Holberton library functions*/
-int _strcmp(char *, char *);
-char *_strdup(char *);
-void print_str(char *, int);
-int print_number(int);
-int _write_char(char);
+/* string handlers */
+int _strcmp(char *s1, char *s2);
+int _strlen(char *s);
+int _strncmp(char *s1, char *s2, int n);
+char *_strdup(char *s);
+char *_strchr(char *s, char c);
 
-/* Helper functions*/
-void error_printing(char *, int, char *);
-void exec_error(char *, int, char *);
+void execution(char *cp, char **cmd);
+char *find_path(void);
 
-#endif
+/* helper function for efficient free */
+void free_buffers(char **buf);
+
+struct builtin
+{
+	char *env;
+	char *exit;
+} builtin;
+
+struct info
+{
+	int final_exit;
+	int ln_count;
+} info;
+
+struct flags
+{
+	bool interactive;
+} flags;
+
+#endif /* SHELL_H */
