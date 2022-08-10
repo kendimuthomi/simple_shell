@@ -1,38 +1,30 @@
 #include "shell.h"
-/**
- *_puts - prints an input string
- * @str: the string to be printed
- */
-void _puts(char *str)
-{
-	int i = 0;
 
-	if (!str)
-		return;
-	while (str[i] != '\0')
-	{
-		_putchar(str[i]);
-		i++;
-	}
-}
 /**
- * _putchar - writes the character c to stdout
- * @c: The character to print
- *
- * Return: On success 1.
- * On error, -1 is returned, and errno is set appropriately.
+ * print_number - Prints an unsigned number
+ * @n: unsigned integer to be printed
+ * Return: The amount of numbers printed
  */
-int _putchar(char c)
+int print_number(int n)
 {
-	static int i;
-	static char buf[WRITE_BUF_SIZE];
+	int div;
+	int len;
+	unsigned int num;
 
-	if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
+	div = 1;
+	len = 0;
+
+	num = n;
+
+	for (; num / div > 9; )
+		div *= 10;
+
+	for (; div != 0; )
 	{
-		write(1, buf, i);
-		i = 0;
+		len += _write_char('0' + num / div);
+		num %= div;
+		div /= 10;
 	}
-	if (c != BUF_FLUSH)
-		buf[i++] = c;
-	return (1);
+
+	return (len);
 }
