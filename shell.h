@@ -132,7 +132,7 @@ char **strtow(char *, char *);
 char **strtow2(char *, char);
 /* memory_functions */
 char *_memset(char *, char, unsigned int);
-void ffree(char **);
+void _free(char **);
 void *_realloc(void *, unsigned int, unsigned int);
 /* memory_functions2.c */
 int bfree(void **);
@@ -148,12 +148,12 @@ int print_d(int, int);
 char *convert_number(long int, int, int);
 void remove_comments(char *);
 /* _builtin_emulators.c */
-int _myexit(info_t *);
-int _mycd(info_t *);
-int _myhelp(info_t *);
+int _exit(info_t *);
+int _cd(info_t *);
+int _help(info_t *);
 /*more_builtin_emulators.c*/
-int _myhistory(info_t *);
-int _myalias(info_t *);
+int _history(info_t *);
+int _alias(info_t *);
 /* getline.c module */
 ssize_t _get_input(info_t *);
 int _getline(info_t *, char **, size_t *);
@@ -164,9 +164,9 @@ void set_info(info_t *, char **);
 void free_info(info_t *, int);
 /* env.c module */
 char *_getenv(info_t *, const char *);
-int _myenv(info_t *);
-int _mysetenv(info_t *);
-int _myunsetenv(info_t *);
+int _env(info_t *);
+int _set_env(info_t *);
+int _unset_env(info_t *);
 int populate_env_list(info_t *);
 /* env2.c module */
 char **get_environ(info_t *);
@@ -181,14 +181,14 @@ int renumber_history(info_t *info);
 /* liststr.c module */
 list_t *add_node(list_t **, const char *, int);
 list_t *add_node_end(list_t **, const char *, int);
-size_t print_list_str(const list_t *);
+size_t print_str(const list_t *);
 int delete_node_at_index(list_t **, unsigned int);
 void free_list(list_t **);
 /* liststr2.c module */
 size_t list_len(const list_t *);
-char **list_to_strings(list_t *);
+char **list_to_str(list_t *);
 size_t print_list(const list_t *);
-list_t *node_starts_with(list_t *, char *, char);
+list_t *node_prefix(list_t *, char *, char);
 ssize_t get_node_index(list_t *, list_t *);
 /* chain.c */
 int _is_chain(info_t *, char *, size_t *);
