@@ -41,10 +41,10 @@ int write_history(info_t *info)
 		return (-1);
 	for (node = info->history; node; node = node->next)
 	{
-		_putsfd(node->str, fd);
-		_putsfd('\n', fd);
+		_putsfd_(node->str, fd);
+		_putfd_('\n', fd);
 	}
-	_putfd(BUF_FLUSH, fd);
+	_putfd_(BUF_FLUSH, fd);
 	close(fd);
 	return (1);
 }
@@ -56,7 +56,7 @@ int write_history(info_t *info)
  */
 int read_history(info_t *info)
 {
-	int i, last = 0; linecount = 0;
+	int i, last = 0, linecount = 0;
 	ssize_t fd, rdlen, fsize = 0;
 	struct stat st;
 	char *buf = NULL, *filename = get_history_file(info);

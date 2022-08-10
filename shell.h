@@ -135,7 +135,7 @@ char *_memset(char *, char, unsigned int);
 void _free(char **);
 void *_realloc(void *, unsigned int, unsigned int);
 /* memory_functions2.c */
-int bfree(void **);
+int _bfree(void **);
 /* more_functions.c */
 int interactive(info_t *);
 int is_delim(char, char *);
@@ -148,7 +148,7 @@ int print_d(int, int);
 char *convert_number(long int, int, int);
 void remove_comments(char *);
 /* _builtin_emulators.c */
-int _exit(info_t *);
+int _shexit(info_t *);
 int _cd(info_t *);
 int _help(info_t *);
 /*more_builtin_emulators.c*/
@@ -165,13 +165,13 @@ void free_info(info_t *, int);
 /* env.c module */
 char *_getenv(info_t *, const char *);
 int _env(info_t *);
-int _set_env(info_t *);
-int _unset_env(info_t *);
-int populate_env_list(info_t *);
+int _setenv(info_t *);
+int _unsetenv(info_t *);
+int _populate_env_list(info_t *);
 /* env2.c module */
 char **get_environ(info_t *);
-int _unsetenv(info_t *, char *);
-int _setenv(info_t *, char *, char *);
+int _unset_env(info_t *, char *);
+int _set_env(info_t *, char *, char *);
 /* file_io_functions.c */
 char *get_history_file(info_t *info);
 int write_history(info_t *info);

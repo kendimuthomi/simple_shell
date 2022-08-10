@@ -5,7 +5,7 @@
  *
  * Return: null
  */
-void_eputs_(char *str)
+void _eputs_(char *str)
 {
 	int i = 0;
 

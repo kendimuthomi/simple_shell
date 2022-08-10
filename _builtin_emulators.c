@@ -1,11 +1,12 @@
+#include "shell.h"
 /**
- * _exit - exits the shell
+ * _shexit - exits the shell
  *  @info: Structure containing potential arguments. Used to maintain
  *  constant function prototype.
  *Return: exits with a given exit status
  *     (0) if info.argv[0] != "exit"
  */
-int _exit(info_t *info)
+int _shexit(info_t *info)
 {
 	int check_exit;
 
@@ -16,8 +17,8 @@ int _exit(info_t *info)
 		{
 			info->status = 2;
 			print_error(info, "Illegal number: ");
-			_eputs(info->argv[1]);
-			_eputchar('\n');
+			_eputs_(info->argv[1]);
+			_eputchar_('\n');
 			return (1);
 		}
 		info->err_num = _erratoi(info->argv[1]);
@@ -66,12 +67,12 @@ int _cd(info_t *info)
 	if (chdir_ret == -1)
 	{
 		print_error(info, "Can't cd to");
-		_eputs(info->argv[1]), _eputchar('\n');
+		_eputs_(info->argv[1]), _eputchar_('\n');
 	}
 	else
 	{
-		_setenv(info, "OLDPWD", _getenv(info, "PWD="));
-		_setenv(info, "PWD", getcwd(buffer, 1024));
+		_set_env(info, "OLDPWD", _getenv(info, "PWD="));
+		_set_env(info, "PWD", getcwd(buffer, 1024));
 	}
 	return (0);
 }

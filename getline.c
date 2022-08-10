@@ -64,7 +64,7 @@ ssize_t _get_input(info_t *info)
 		j = i; /* init new iterator to current buf position */
 		p = buf + i; /* get pointer for return */
 
-		_check_chain(info, buf, &j, len);
+		_check_chain(info, buf, &j, i, len);
 		while (j < len) /* iterate to semicolon or end */
 		{
 			if (_is_chain(info, buf, &j))
@@ -98,7 +98,7 @@ ssize_t _read_buf(info_t *info, char *buf, size_t *i)
 	if (*i)
 		return (0);
 	r = read(info->readfd, buf, READ_BUF_SIZE);
-	if (r = 0)
+	if (r >= 0)
 		*i = r;
 	return (r);
 }
@@ -149,7 +149,7 @@ int _getline(info_t *info, char **ptr, size_t *length)
  *
  * Return: void
  */
-void sigintHandler(_attribute_((unused))int sig_num)
+void sigintHandler(__attribute__((unused))int sig_num)
 {
 	_puts("\n");
 	_puts("$");

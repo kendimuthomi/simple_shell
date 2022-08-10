@@ -27,7 +27,7 @@ char **list_to_str(list_t *head)
 	list_t *node = head;
 	size_t i = list_len(head), j;
 	char **strings;
-	char **str;
+	char *str;
 
 	if (!head || !i)
 		return (NULL);
@@ -44,7 +44,7 @@ char **list_to_str(list_t *head)
 			free(strings);
 			return (NULL);
 		}
-		str = strcpy(str, node->str);
+		str = _strcpy(str, node->str);
 		strings[i] = str;
 	}
 	strings[i] = NULL;
@@ -100,7 +100,7 @@ list_t *node_prefix(list_t *node, char *prefix, char c)
  *
  * Return: index of node or -1
  */
-size_t get_node_index(list_t *h, list_t *node)
+ssize_t get_node_index(list_t *h, list_t *node)
 {
 	size_t i = 0;
 

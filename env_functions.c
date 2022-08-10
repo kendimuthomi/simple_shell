@@ -42,10 +42,10 @@ int _setenv(info_t *info)
 {
 	if (info->argc != 3)
 	{
-		_eputs("Incorrect number of arguments\n");
+		_eputs_("Incorrect number of arguments\n");
 		return (1);
 	}
-	if (_setenv(info, info->argv[1], info->argv[2]))
+	if (_set_env(info, info->argv[1], info->argv[2]))
 		return (0);
 	return (1);
 }
@@ -61,7 +61,7 @@ int _unsetenv(info_t *info)
 
 	if (info->argc == 1)
 	{
-		_eputs("Too few arguments\n");
+		_eputs_("Too few arguments\n");
 		return (1);
 	}
 	for (i = 1; i <= info->argc; i++)
@@ -79,7 +79,7 @@ int _populate_env_list(info_t *info)
 	list_t *node = NULL;
 	size_t i;
 
-	for (i = -; environ[i]; i++)
+	for (i = 0; environ[i]; i++)
 		add_node_end(&node, environ[i], 0);
 	info->env = node;
 	return (0);

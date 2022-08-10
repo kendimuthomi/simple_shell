@@ -46,22 +46,22 @@ void set_info_(info_t *info, char **av)
  */
 void _free_info(info_t *info, int all)
 {
-	ffree(info->argv);
+	_free(info->argv);
 	info->argv = NULL;
-	info-> = NULL;
+	info->path = NULL;
 	if (all)
 	{
-		if (infp->cmd_buf)
+		if (info->cmd_buf)
 			free(info->arg);
 		if (info->env)
-			free_lists(&(info->env));
+			free_list(&(info->env));
 		if (info->history)
 			free_list(&(info->history));
 		if (info->alias)
-			free_lists(&(info->alias));
-		ffree(info->environ);
+			free_list(&(info->alias));
+		_free(info->environ);
 			info->environ = NULL;
-		bfree(void **)info->cmd_buf);
+		_bfree((void **)info->cmd_buf);
 		if (info->readfd > 2)
 			close(info->readfd);
 		_putchar(BUF_FLUSH);
