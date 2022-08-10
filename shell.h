@@ -118,23 +118,23 @@ int _strlen(char *);
 int _strcmp(char *, char *);
 char *starts_with(const char *, const char *);
 char *_strcat(char *, char *);
-/* string_functions2.c */
+/* more_string_functions.c */
 char *_strcpy(char *, char *);
 char *_strdup(const char *);
-void _puts(char *);
-int _putchar(char);
-/* string_functions3.c */
 char *_strncpy(char *, char *, int);
 char *_strncat(char *, char *, int);
 char *_strchr(char *, char);
-/* string_functions4.c */
+/* _print.c */
+void _puts(char *str);
+int _putchar(char c);
+/* even_more_string_functions.c */
 char **strtow(char *, char *);
 char **strtow2(char *, char);
 /* memory_functions */
 char *_memset(char *, char, unsigned int);
-void _free(char **);
 void *_realloc(void *, unsigned int, unsigned int);
-/* memory_functions2.c */
+/* free_memory_functions.c */
+void _free(char **pp);
 int _bfree(void **);
 /* more_functions.c */
 int interactive(info_t *);
@@ -159,9 +159,9 @@ ssize_t _get_input(info_t *);
 int _getline(info_t *, char **, size_t *);
 void sigintHandler(int);
 /* info.c module */
-void clear_info(info_t *);
-void set_info(info_t *, char **);
-void free_info(info_t *, int);
+void _clear_info(info_t *);
+void _set_info(info_t *, char **);
+void _free_info(info_t *, int);
 /* env.c module */
 char *_getenv(info_t *, const char *);
 int _env(info_t *);
@@ -169,7 +169,7 @@ int _setenv(info_t *);
 int _unsetenv(info_t *);
 int _populate_env_list(info_t *);
 /* env2.c module */
-char **get_environ(info_t *);
+char **_get_environ(info_t *);
 int _unset_env(info_t *, char *);
 int _set_env(info_t *, char *, char *);
 /* file_io_functions.c */
