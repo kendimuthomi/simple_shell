@@ -1,69 +1,81 @@
 #include "shell.h"
-
 /**
- * _strcmp - compares two strings
- * @s1: First string
- * @s2: Second string
- * Return: 0 if strings match. -1 Otherwise.
+ * str_len - Calculates the lenght of a string.
+ * @str: String that needs length to be found.
+ * Return: Upon success returns the length of a string. otherwise 0.
  */
-int _strcmp(char *s1, char *s2)
-{
-	int i;
-
-	if (str_len(s1) != str_len(s2))
-		return (-1);
-	for (i = 0; s1[i] != '\0'; i++)
-	{
-		if (s1[i] != s2[i])
-			return (-1);
-	}
-	return (0);
-}
-
-/**
- * _strdup - create a copy of a string
- * @src: Contains the original string
- * Return: Gives back the copy of string
- */
-char *_strdup(char *src)
-{
-	int i;
-	int len;
-	char *dest;
-
-	len = str_len(src);
-	dest = malloc(sizeof(char) * (len + 1));
-
-	for (i = 0; src[i] != '\0'; i++)
-		dest[i] = src[i];
-	dest[i] = '\0';
-	return (dest);
-}
-
-/**
- * print_str - Prints a string character by character.
- * @str: String to be printed. If the string is NULL it will print (null)
- * @new_line: If integer is 0 a new line will be printed. Otherwise a new line
- * will not be printed.
- */
-void print_str(char *str, int new_line)
+int str_len(char *str)
 {
 	int i;
 
 	if (str == NULL)
-		str = "(null)";
+		return (0);
 	for (i = 0; str[i] != '\0'; i++)
-		write(STDOUT_FILENO, &str[i], 1);
-	if (new_line == 0)
-		write(STDOUT_FILENO, "\n", 1);
+		;
+	return (i);
 }
 
 /**
- * _write_char - Writes a character to stdout
- * @c: Character that will be written to stdout
- * Return: Upon success how many characters were written.
+ * double_free - Free double pointer variables.
+ * @to_be_freed: The address of the elements that need to be freed.
  */
-int _write_char(char c)
+void double_free(char **to_be_freed)
 {
-	return (write(1, &c, 1));
+	int index;
+
+	for (index = 0; to_be_freed[index] != NULL; index++)
+		free(to_be_freed[index]);
+	free(to_be_freed);
+}
+
+/**
+ * single_free - Will free a n amount of pointers to a string.
+ * @n: The number of pointers to free.
+ */
+void single_free(int n, ...)
+{
+	int i;
+	char *str;
+	va_list a_list;
+
+	va_start(a_list, n);
+	for (i = 0; i < n; i++)
+	{
+		str = va_arg(a_list, char*);
+		if (str == NULL)
+			str = "(nil)";
+		free(str);
+	}
+	va_end(a_list);
+}
+
+
+/**
+ * error_printing - Prints a message error when a comand is not found.
+ * @count: A counter keeping track of the number of commands run on the shell.
+ * @av: The name of the program running the shell.
+ * @command: The specific command not being found.
+ */
+void error_printing(char *av, int count, char *command)
+{
+	print_str(av, 1);
+	print_str(": ", 1);
+	print_number(count);
+	print_str(": ", 1);
+	print_str(command, 1);
+}
+
+/**
+ * exec_error - Prints exec errors.
+ * @av: The name of the program running the shell.
+ * @count: Keeps track of how many commands have been entered.
+ * @tmp_command: The command that filed.
+ */
+
+void exec_error(char *av, int count, char *tmp_command)
+{
+	error_printing(av, count, tmp_command);
+	print_str(": ", 1);
+	perror("");
+	exit(1);
 }
