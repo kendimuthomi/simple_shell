@@ -1,92 +1,81 @@
 #include "shell.h"
 /**
- * _strdup - duplicates a string
- * @str: the string to duplicate
- *
- * Return: pointer to the duplicated string
+ * str_len - Calculates the lenght of a string.
+ * @str: String that needs length to be found.
+ * Return: Upon success returns the length of a string. otherwise 0.
  */
-char *_strdup(const char *str)
+int str_len(char *str)
 {
-	int len = 0;
-	char *ret;
+	int i;
 
 	if (str == NULL)
-		return (NULL);
-	while (*str++)
-		len++;
-	ret = malloc(sizeof(char *) * (len + 1));
-	if (!ret)
-		return (NULL);
-	for (len++; len--;)
-		ret[len] = *--str;
-	return (ret);
+		return (0);
+	for (i = 0; str[i] != '\0'; i++)
+		;
+	return (i);
 }
-/**
- *_strncpy - copies a string
- *@dest: the destination string to be copied to
- *@src: the source string
- *@n: the amount of characters to be copied
- *Return: the concatenated string
- */
-char *_strncpy(char *dest, char *src, int n)
-{
-	int i, j;
-	char *s = dest;
 
-	i = 0;
-	while (src[i] != '\0' && i < n - 1)
-	{
-		dest[i] = src[i];
-		i++;
-	}
-	if (i < n)
-	{
-		j = i;
-		while (j < n)
-		{
-			dest[j] = '\0';
-			j++;
-		}
-	}
-	return (s);
-}
 /**
- *_strncat - concatenates two strings
- *@dest: the first string
- *@src: the second string
- *@n: the amount of bytes to be maximally used
- *Return: the concatenated string
+ * double_free - Free double pointer variables.
+ * @to_be_freed: The address of the elements that need to be freed.
  */
-char *_strncat(char *dest, char *src, int n)
+void double_free(char **to_be_freed)
 {
-	int i, j;
-	char *s = dest;
+	int index;
 
-	i = 0;
-	j = 0;
-	while (dest[i] != '\0')
-		i++;
-	while (src[j] != '\0' && j < n)
-	{
-		dest[i] = src[j];
-		i++;
-		j++;
-	}
-	if (j < n)
-		dest[i] = '\0';
-	return (s);
+	for (index = 0; to_be_freed[index] != NULL; index++)
+		free(to_be_freed[index]);
+	free(to_be_freed);
 }
+
 /**
- *_strchr - locates a character in a string
- *@s: the string to be parsed
- *@c: the character to look for
- *Return: (s) a pointer to the memory area s
+ * single_free - Will free a n amount of pointers to a string.
+ * @n: The number of pointers to free.
  */
-char *_strchr(char *s, char c)
+void single_free(int n, ...)
 {
-	do {
-		if (*s == c)
-			return (s);
-	} while (*s++ != '\0');
-	return (NULL);
+	int i;
+	char *str;
+	va_list a_list;
+
+	va_start(a_list, n);
+	for (i = 0; i < n; i++)
+	{
+		str = va_arg(a_list, char*);
+		if (str == NULL)
+			str = "(nil)";
+		free(str);
+	}
+	va_end(a_list);
+}
+
+
+/**
+ * error_printing - Prints a message error when a comand is not found.
+ * @count: A counter keeping track of the number of commands run on the shell.
+ * @av: The name of the program running the shell.
+ * @command: The specific command not being found.
+ */
+void error_printing(char *av, int count, char *command)
+{
+	print_str(av, 1);
+	print_str(": ", 1);
+	print_number(count);
+	print_str(": ", 1);
+	print_str(command, 1);
+}
+
+/**
+ * exec_error - Prints exec errors.
+ * @av: The name of the program running the shell.
+ * @count: Keeps track of how many commands have been entered.
+ * @tmp_command: The command that filed.
+ */
+
+void exec_error(char *av, int count, char *tmp_command)
+{
+	error_printing(av, count, tmp_command);
+	print_str(": ", 1);
+	perror("");
+	exit(1);
 }
