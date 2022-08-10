@@ -17,7 +17,7 @@ int hsh(info_t *info, char **av)
 		clear_info(info);
 		if (interactive(info))
 			_puts("$ ");
-		_eputchar(BUF_FLUSH);
+		_eputchar_(BUF_FLUSH);
 		r = get_input(info);
 		if (r != -1)
 		{
@@ -56,14 +56,14 @@ int find_builtin(info_t *info)
 {
 	int i, built_in_ret = -1;
 	builtin_table builtintbl[] = {
-		{"exit", _myexit},
-		{"env", _myenv},
-		{"help", _myhelp},
-		{"history", _myhistory},
-		{"setenv", _mysetenv},
-		{"unsetenv", _myunsetenv},
-		{"cd", _mycd},
-		{"alias", _myalias},
+		{"exit", _shexit},
+		{"env", _env},
+		{"help", _help},
+		{"history", _history},
+		{"setenv", _setenv},
+		{"unsetenv", _unsetenv},
+		{"cd", _cd},
+		{"alias", _alias},
 		{NULL, NULL}
 	};
 
@@ -100,7 +100,7 @@ void find_cmd(info_t *info)
 	if (!k)
 		return;
 
-	path = find_path(info, _getenv(info, "PATH="), info->argv[0]);
+	path = find_path_(info, _getenv(info, "PATH="), info->argv[0]);
 	if (path)
 	{
 		info->path = path;
