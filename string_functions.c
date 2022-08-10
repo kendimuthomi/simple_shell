@@ -1,91 +1,69 @@
 #include "shell.h"
-/**
- * _strlen - returns the length of a string
- * @s: the string whose length to check
- *
- * Return: integer length of string
- */
-int _strlen(char *s)
-{
-	int i = 0;
 
-	if (!s)
-		return (0);
-	while (*s++)
-		i++;
-	return (i);
-}
 /**
- * _strcmp - performs lexicogarphic comparison of two strangs.
- * @s1: the first strang
- * @s2: the second strang
- *
- * Return: negative if s1 < s2, positive if s1 > s2, zero if s1 == s2
+ * _strcmp - compares two strings
+ * @s1: First string
+ * @s2: Second string
+ * Return: 0 if strings match. -1 Otherwise.
  */
 int _strcmp(char *s1, char *s2)
 {
-	while (*s1 && *s2)
+	int i;
+
+	if (str_len(s1) != str_len(s2))
+		return (-1);
+	for (i = 0; s1[i] != '\0'; i++)
 	{
-		if (*s1 != *s2)
-			return (*s1 - *s2);
-		s1++;
-		s2++;
+		if (s1[i] != s2[i])
+			return (-1);
 	}
-	if (*s1 == *s2)
-		return (0);
-	else
-		return (*s1 < *s2 ? -1 : 1);
+	return (0);
 }
-/**
- * starts_with - checks if needle starts with haystack
- * @haystack: string to search
- * @needle: the substring to find
- *
- * Return: address of next char of haystack or NULL
- */
-char *starts_with(const char *haystack, const char *needle)
-{
-	while (*needle)
-		if (*needle++ != *haystack++)
-			return (NULL);
-	return ((char *) haystack);
-}
-/**
- * _strcat - concatenates two strings
- * @dest: the destination buffer
- * @src: the source buffer
- *
- * Return: pointer to destination buffer
- */
-char *_strcat(char *dest, char *src)
-{
-	char *ret = dest;
 
-	while (*dest)
-		dest++;
-	while (*src)
-		*dest++ = *src++;
-	*dest = *src;
-	return (ret);
-}
 /**
- * _strcpy - copies a string
- * @dest: the destination
- * @src: the source
- *
- * Return: pointer to destination
+ * _strdup - create a copy of a string
+ * @src: Contains the original string
+ * Return: Gives back the copy of string
  */
-char *_strcpy(char *dest, char *src)
+char *_strdup(char *src)
 {
-	int i = 0;
+	int i;
+	int len;
+	char *dest;
 
-	if (dest == src || src == 0)
-		return (dest);
-	while (src[i])
-	{
+	len = str_len(src);
+	dest = malloc(sizeof(char) * (len + 1));
+
+	for (i = 0; src[i] != '\0'; i++)
 		dest[i] = src[i];
-		i++;
-	}
-	dest[i] = 0;
+	dest[i] = '\0';
 	return (dest);
+}
+
+/**
+ * print_str - Prints a string character by character.
+ * @str: String to be printed. If the string is NULL it will print (null)
+ * @new_line: If integer is 0 a new line will be printed. Otherwise a new line
+ * will not be printed.
+ */
+void print_str(char *str, int new_line)
+{
+	int i;
+
+	if (str == NULL)
+		str = "(null)";
+	for (i = 0; str[i] != '\0'; i++)
+		write(STDOUT_FILENO, &str[i], 1);
+	if (new_line == 0)
+		write(STDOUT_FILENO, "\n", 1);
+}
+
+/**
+ * _write_char - Writes a character to stdout
+ * @c: Character that will be written to stdout
+ * Return: Upon success how many characters were written.
+ */
+int _write_char(char c)
+{
+	return (write(1, &c, 1));
 }
