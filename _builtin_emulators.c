@@ -1,94 +1,106 @@
 #include "shell.h"
-/**
- * _shexit - exits the shell
- *  @info: Structure containing potential arguments. Used to maintain
- *  constant function prototype.
- *Return: exits with a given exit status
- *     (0) if info.argv[0] != "exit"
- */
-int _shexit(info_t *info)
-{
-	int check_exit;
 
-	if (info->argv[1])
-	{
-		check_exit = _erratoi(info->argv[1]);
-		if (check_exit == -1)
-		{
-			info->status = 2;
-			print_error(info, "Illegal number: ");
-			_eputs_(info->argv[1]);
-			_eputchar_('\n');
-			return (1);
-		}
-		info->err_num = _erratoi(info->argv[1]);
-		return (-2);
-	}
-	info->err_num = -1;
-	return (-2);
-}
 /**
- * _cd - changes the current directory of the process
- * @info: Structure containing potential arguments. Used to maintain
- *          constant function prototype.
- * Return: Always 0
+ * cd_b - Changes the current working directory to the parameter passed to cd.
+ * if no parameter is passed it will change directory to HOME.
+ * @line: A string representing the input from the user.
  */
-int _cd(info_t *info)
+void cd_b(char *line)
 {
-	char *s, *dir, buffer[1024];
-	int chdir_ret;
+	int index;
+	int token_count;
+	char **param_array;
+	const char *delim = "\n\t ";
 
-	s = getcwd(buffer, 1024);
-	if (!s)
-		_puts("TODO: >>getcwd failure emsg here<<\n");
-	if (!info->argv[1])
+	token_count = 0;
+	param_array = token_interface(line, delim, token_count);
+	if (param_array[0] == NULL)
 	{
-		dir = _getenv(info, "HOME=");
-		if (!dir)
-			chdir_ret = /*TODO: what should this be?*/
-				chdir((dir = _getenv(info, "PWD=")) ? dir : "/");
-		else
-			chdir_ret = chdir(dir);
+		single_free(2, param_array, line);
+		return;
 	}
-	else if (_strcmp(info->argv[1], "-") == 0)
+	if (param_array[1] == NULL)
 	{
-		if (!_getenv(info, "OLDPWD="))
-		{
-			_puts(s);
-			_putchar('\n');
-			return (1);
-		}
-		_puts(_getenv(info, "OLDPWD=")), _putchar('\n');
-		chdir_ret = /*TODO: wgat should this be?*/
-			chdir((dir = _getenv(info, "OLDPWD=")) ? dir : "/");
+		index = find_path("HOME");
+		chdir((environ[index]) + 5);
 	}
+	else if (_strcmp(param_array[1], "-") == 0)
+		print_str(param_array[1], 0);
+
 	else
-		chdir_ret = chdir(info->argv[1]);
-	if (chdir_ret == -1)
-	{
-		print_error(info, "Can't cd to");
-		_eputs_(info->argv[1]), _eputchar_('\n');
-	}
-	else
-	{
-		_set_env(info, "OLDPWD", _getenv(info, "PWD="));
-		_set_env(info, "PWD", getcwd(buffer, 1024));
-	}
-	return (0);
+		chdir(param_array[1]);
+	double_free(param_array);
 }
-/**
- * _help - changes the current directory of the process
- * @info: Structure containing potential arguments. Used to maintain
- *          constant function prototype.
- * Return: Always 0
- */
-int _help(info_t *info)
-{
-	char **args_array;
 
-	args_array = info->argv;
-	_puts("This is a simple shell that we created as part of the school project");
-	if (0)
-		_puts(*args_array);
+/**
+ * env_b - Prints all the environmental variables in the current shell.
+ * @line: A string representing the input from the user.
+ */
+void env_b(__attribute__((unused))char *line)
+{
+	int i;
+	int j;
+
+	for (i = 0; environ[i] != NULL; i++)
+	{
+		for (j = 0; environ[i][j] != '\0'; j++)
+			write(STDOUT_FILENO, &environ[i][j], 1);
+		write(STDOUT_FILENO, "\n", 1);
+	}
+}
+
+/**
+ * exit_b - Exits the shell. After freeing allocated resources.
+ * @line: A string representing the input from the user.
+ */
+void exit_b(char *line)
+{
+	free(line);
+	print_str("\n", 1);
+	exit(1);
+}
+
+/**
+ * check_built_ins - Finds the right function needed for execution.
+ * @str: The name of the function that is needed.
+ * Return: Upon sucess a pointer to a void function. Otherwise NULL.
+ */
+void (*check_built_ins(char *str))(char *str)
+{
+	int i;
+
+	builtin_t buildin[] = {
+		{"exit", exit_b},
+		{"env", env_b},
+		{"cd", cd_b},
+		{NULL, NULL}
+	};
+
+	for (i = 0; buildin[i].built != NULL; i++)
+	{
+		if (_strcmp(str, buildin[i].built) == 0)
+		{
+			return (buildin[i].f);
+		}
+	}
+	return (NULL);
+}
+
+/**
+ * built_in - Checks for builtin functions.
+ * @command: An array of all the arguments passed to the shell.
+ * @line: A string representing the input from the user.
+ * Return: If function is found 0. Otherwise -1.
+ */
+int built_in(char **command, char *line)
+{
+	void (*build)(char *);
+
+	build = check_built_ins(command[0]);
+	if (build == NULL)
+		return (-1);
+	if (_strcmp("exit", command[0]) == 0)
+		double_free(command);
+	build(line);
 	return (0);
 }
