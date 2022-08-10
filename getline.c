@@ -1,158 +1,174 @@
 #include "shell.h"
 /**
- * _input_buf - buffers chained commands
- * @info: parameter struct
- * @buf: address of buffer
- * @len: address of len var
- *
- * Return: byes read
+ * parse_line - Parses the command line looking for commands and argumements.
+ * This function it is also in charged of freeing memory that is not longer
+ * needed by the program.
+ * @line: A pointer to a string. Will always be NULL upon function entry.
+ * @size: A holder for numbers of size_t. Will always be initilized to 0.
+ * @command_counter: A counter keeping track of how many commands have been
+ * entered into the shell.
+ * @av: Name of the program running the shell
  */
-ssize_t _input_buf(info_t *info, char **buf, size_t *len)
+void parse_line(char *line, size_t size, int command_counter, char **av)
 {
-	ssize_t r = 0;
-	size_t len_p = 0;
+	int i;
+	ssize_t read_len;
+	int token_count;
+	char **param_array;
+	const char *delim = "\n\t ";
 
-	if (!*len) /* if nothing left in the buffer, fill it */
+	token_count = 0;
+	write(STDOUT_FILENO, PROMPT, str_len(PROMPT));
+	read_len = getline(&line, &size, stdin);
+	if (read_len != -1)
 	{
-		/*bfree(void **)info->cmd_buf);*/
-		free(*buf);
-		*buf = NULL;
-		signal(SIGINT, sigintHandler);
-#if USE_GETLINE
-		r = getline(buf, &len_p, stdin);
-#else
-		r = _getline(info, buf, &len_p);
-#endif
-		if (r > 0)
+		param_array = token_interface(line, delim, token_count);
+		if (param_array[0] == NULL)
 		{
-			if ((*buf)[r - 1] == '\n')
-			{
-				(*buf)[r - 1] = '\0'; /* remove trailing newline */
-				r--;
-			}
-			info->linecount_flag = 1;
-			remove_comments(*buf);
-			build_history_list(info, *buf, info->histcount++);
-			/* if (_strchr(*buf, ';')) is this a command chain? */
-			{
-				*len = r;
-				info->cmd_buf = buf;
-			}
+			single_free(2, param_array, line);
+			return;
 		}
+		i = built_in(param_array, line);
+		if (i == -1)
+			create_child(param_array, line, command_counter, av);
+		for (i = 0; param_array[i] != NULL; i++)
+			free(param_array[i]);
+		single_free(2, param_array, line);
 	}
-	return (r);
-}
-/**
- * _get_input - gets a line minus the newline
- * @info: parameter struct
- *
- * Return: bytes read
- */
-ssize_t _get_input(info_t *info)
-{
-	static char *buf; /* the ';' command chain buffer */
-	static size_t i, j, len;
-	ssize_t r = 0;
-	char **buf_p = &(info->arg), *p;
-
-	_putchar(BUF_FLUSH);
-	r = _input_buf(info, &buf, &len);
-	if (r == -1) /* EOF */
-		return (-1);
-	if (len) /* there are commands left in the buffer */
-	{
-		j = i; /* init new iterator to current buf position */
-		p = buf + i; /* get pointer for return */
-
-		_check_chain(info, buf, &j, i, len);
-		while (j < len) /* iterate to semicolon or end */
-		{
-			if (_is_chain(info, buf, &j))
-				break;
-			j++;
-		}
-		i = j + 1; /* increment past nulled ';'' */
-		if (i >= len) /* reached end of buffer? */
-		{
-			i = len = 0; /* reset position and length */
-			info->cmd_buf_type = CMD_NORM;
-		}
-		*buf_p = p; /* pass back pointer to current command position */
-		return (_strlen(p)); /* return length of the current command */
-	}
-	*buf_p = buf; /* Else not a chain, pass back buffer from _getline() */
-	return (r); /* return length of buffer from getline() */
-}
-/**
- * _read_buf - reads a buffer
- * @info: parameter struct
- * @buf: buffer
- * @i: size
- *
- * Return: r
- */
-ssize_t _read_buf(info_t *info, char *buf, size_t *i)
-{
-	ssize_t r = 0;
-
-	if (*i)
-		return (0);
-	r = read(info->readfd, buf, READ_BUF_SIZE);
-	if (r >= 0)
-		*i = r;
-	return (r);
-}
-/**
- * _getline - gets the next line of input from STDIN
- * @info: parameter struct
- * @ptr: address of pointer to buffer, preallocated or NULL
- * @length: size of preallocated ptr buffer if not NULL
- *
- * Return: s
- */
-int _getline(info_t *info, char **ptr, size_t *length)
-{
-	static char buf[READ_BUF_SIZE];
-	static size_t i, len;
-	size_t k;
-	ssize_t r = 0, s = 0;
-	char *p = NULL, *new_p = NULL, *c;
-
-	p = *ptr;
-	if (p && length)
-		s = *length;
-	if (i == len)
-		i = len = 0;
-	r = _read_buf(info, buf, &len);
-	if (r == -1 || (r == 0 && len == 0))
-			return (-1);
-	c = _strchr(buf + i, '\n');
-	k = c ? 1 + (unsigned int)(c - buf) : len;
-	new_p = _realloc(p, s, s ? s + k : k + 1);
-	if (!new_p) /* MALLOC FAILURE */
-		return (p ? free(p), -1 : -1);
-	if (s)
-		_strncat(new_p, buf + i, k - i);
 	else
-		_strncpy(new_p, buf + i, k - i + 1);
-	s += k - 1;
-	i = k;
-	p = new_p;
-	if (length)
-		*length = s;
-	*ptr = p;
-	return (s);
-}
-/**
- * sigintHandler - blocks ctrl-C
- * @sig_num: the signal number
- *
- * Return: void
- */
-void sigintHandler(__attribute__((unused))int sig_num)
-{
-	_puts("\n");
-	_puts("$");
-	_putchar(BUF_FLUSH);
+		exit_b(line);
 }
 
+/**
+ * create_child - Creates a child in order to execute another program.
+ * @param_array: An array of pointers to strings containing the possible name
+ * of a program and its parameters. This array is NULL terminated.
+ * @line: The contents of the read line.
+ * @count: A counter keeping track of how many commands have been entered
+ * into the shell.
+ * @av: Name of the program running the shell
+ */
+void create_child(char **param_array, char *line, int count, char **av)
+{
+	pid_t id;
+	int status;
+	int i;
+	int check;
+	struct stat buf;
+	char *tmp_command;
+	char *command;
+
+	id = fork();
+	if (id == 0)
+	{
+		tmp_command = param_array[0];
+		command = path_finder(param_array[0]);
+		if (command == NULL)
+		{
+			/*Looking for file in current directory*/
+			check = stat(tmp_command, &buf);
+			if (check == -1)
+			{
+				error_printing(av[0], count, tmp_command);
+				print_str(": not found", 0);
+				single_free(2, line, tmp_command);
+				for (i = 1; param_array[i]; i++)
+					free(param_array[i]);
+				free(param_array);
+				exit(100);
+			}
+			/*file exist in cwd or has full path*/
+			command = tmp_command;
+		}
+		param_array[0] = command;
+		if (param_array[0] != NULL)
+		{
+			if (execve(param_array[0], param_array, environ) == -1)
+				exec_error(av[0], count, tmp_command);
+		}
+	}
+	else
+		wait(&status);
+}
+
+/**
+ * token_interface - Meant to interact with other token functions, and make
+ * them more accessible to other parts of the program.
+ * @line: A string containing the raw user input.
+ * @delim: A constant string containing the desired delimeter to tokenize line.
+ * @token_count: A holder for the amount of tokens in a string.
+ * Return: Upon success an array of tokens representing the command. Otherwise
+ * returns NULL.
+ */
+char **token_interface(char *line, const char *delim, int token_count)
+{
+	char **param_array;
+
+	token_count = count_token(line, delim);
+	if (token_count == -1)
+	{
+		free(line);
+		return (NULL);
+	}
+	param_array = tokenize(token_count, line, delim);
+	if (param_array == NULL)
+	{
+		free(line);
+		return (NULL);
+	}
+
+	return (param_array);
+}
+
+/**
+ * tokenize - Separates a string into an array of tokens. DON'T FORGET TO FREE
+ * on receiving function when using tokenize.
+ * @token_count: An integer representing the amount of tokens in the array.
+ * @line: String that is separated by an specified delimeter
+ * @delim: The desired delimeter to separate tokens.
+ * Return: Upon success a NULL terminated array of pointer to strings.
+ * Otherwise returns NULL.
+ */
+char **tokenize(int token_count, char *line, const char *delim)
+{
+	int i;
+	char **buffer;
+	char *token;
+	char *line_cp;
+
+	line_cp = _strdup(line);
+	buffer = malloc(sizeof(char *) * (token_count + 1));
+	if (buffer == NULL)
+		return (NULL);
+	token = strtok(line_cp, delim);
+	for (i = 0; token != NULL; i++)
+	{
+		buffer[i] = _strdup(token);
+		token = strtok(NULL, delim);
+	}
+	buffer[i] = NULL;
+	free(line_cp);
+	return (buffer);
+}
+
+/**
+ * count_token - Counts tokens in the passed string.
+ * @line: String that is separated by an specified delimeter
+ * @delim: The desired delimeter to separate tokens.
+ * Return: Upon success the total count of the tokens. Otherwise -1.
+ */
+int count_token(char *line, const char *delim)
+{
+	char *str;
+	char *token;
+	int i;
+
+	str = _strdup(line);
+	if (str == NULL)
+		return (-1);
+	token = strtok(str, delim);
+	for (i = 0; token != NULL; i++)
+		token = strtok(NULL, delim);
+	free(str);
+	return (i);
+}
